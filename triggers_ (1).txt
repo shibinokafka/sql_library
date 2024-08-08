@@ -1,0 +1,97 @@
+
+drop trigger if exist autor_before_insert ;
+delimiter $$
+create trigger autor_before_insert
+before insert on autor for each row
+begin
+insert into audi_autor(
+aut_codigo_audi
+new.aut_apellido
+new.aut_nacimiento
+new.aut_muerte
+aut_fechaModificacion,
+aut_usuario,
+aut_accion
+)
+Values(aut_codigo,new.aut_apellido,new.aut_nacimiento,new.aut_muerte,
+NOW(),                        
+ CURRENT_USER(),                 
+  'insertar'               
+);
+end $$
+delimiter;
+
+
+
+
+CREATE TABLE audi_autor(
+aud_id int(11),
+aut_codigo_audi int(11),
+aut_apellido_anterior varchar(45),
+aut_nacimiento_anterior date,
+aut_muerte_anterior date,
+aut_apellido_nuevo varchar(45),
+aut_nacimiento_nuevo date,
+aut_muerte_nuevo date,
+aut_fechaModificacion datetime,    
+aut_usuario varchar(20),
+aut_accion varchar(20),
+PRIMARY key (aud_id)
+
+)
+
+CREATE TRIGGER autores_before_update
+BEFORE UPDATE ON autor
+FOR EACH ROW
+BEGIN
+    -- Insertar los valores antiguos y nuevos en la tabla de auditoría
+    INSERT INTO audi_autor (
+        aut_codigo_audi,
+        aut_apellido_anterior,
+        aut_nacimiento_anterior,
+        aut_muerte_anterior,
+        aut_apellido_nuevo,
+        aut_nacimiento_nuevo,
+        aut_muerte_nuevo,
+        aut_fechaModificacion,
+        aut_usuario,
+        aut_accion
+    )
+    VALUES (
+        OLD.aut_codigo,                 -- Código anterior del autor
+        OLD.aut_apellido,               -- Apellido anterior del autor
+        OLD.aut_nacimiento,             -- Fecha de nacimiento anterior del autor
+        OLD.aut_muerte,                 -- Fecha de muerte anterior del autor
+        NEW.aut_apellido,               -- Nuevo apellido del autor
+        NEW.aut_nacimiento,             -- Nueva fecha de nacimiento del autor
+        NEW.aut_muerte,                 -- Nueva fecha de muerte del autor
+        NOW(),                          -- Fecha y hora de la modificación
+        CURRENT_USER(),                 -- Usuario que realiza la modificación
+        'Actualizacion'                 -- Acción realizada (Actualización)
+    );
+END;
+UPDATE autor set aut_apellido='martinez', aut_nacimiento='1899-08-23',
+aut_muerte='2000-04-12'
+WHERE aut_codigo =345;
+SELECT* FROM audi_autor;
+9889 	
+
+DROP TRIGGER if EXISTS autor_after_delete;
+create TRIGGER autor_after_delete AFTER DELETE ON 
+autor FOR EACH ROW
+INSERT INTO audi_autor(
+aut_codigo_audi,
+aut_apellido_anterior,
+aut_nacimiento_anterior,
+aut_muerte_anterior,
+aut_fechaModificacion,
+aut_usuario,
+aut_accion
+)
+Values(aut_codigo_audi,aut_apellido_anterior,aut_nacimiento_anterior,aut_muerte_anterior,
+NOW(),                        
+CURRENT_USER(),                 
+'registro eliminado'               
+);
+DELETE FROM autor
+WHERE aut_codigo=9889;

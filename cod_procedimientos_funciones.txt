@@ -1,0 +1,99 @@
+
+1 DELIMITER $$
+
+CREATE PROCEDURE socio_prestamo()
+BEGIN
+    SELECT 
+        S.soc_nombre, 
+        S.soc_apellido, 
+        CONCAT(S.soc_nombre, ' ', S.soc_apellido) AS `NOMBRE SOCIO`
+    FROM 
+        socio S
+    LEFT JOIN 
+        prestamo P 
+    ON 
+        S.soc_numero = P.soc_copiaNumero;
+END $$
+
+DELIMITER ;
+
+2
+delimiter $$
+create procedure libro_prestamo 
+BEGIN
+    SELECT 
+        lib_titulo, pres_fechaDevolucion, pres_fechaPrestamo
+    FROM 
+        libro
+    LEFT JOIN 
+        prestamo 
+    ON 
+        libro.lib_isbn = prestamo.lib_copiaISBN;
+END $$
+delimiter;
+3
+DELIMITER $$
+CREATE PROCEDURE insert_socio(c1_numero int(11), c2_nombre varchar(45),c3_apellido varchar(45),c4_direccion varchar(255),c5_telefono varchar(10))
+BEGIN
+INSERT INTO 
+socio(soc_numero,soc_nombre,soc_apellido,soc_direccion,soc_telefono)
+VALUES(c1_numero,c2_nombre,c3_apellido,c4_direccion,c5_telefono);
+END $$
+DELIMITER ;
+call insert_socio(23,'mario','perez','cra 7#21-c',8736273);
+4 DELIMITER $$
+CREATE PROCEDURE nom_libro()
+BEGIN
+SELECT* FROM libro
+WHERE lib_titulo like CONCAT ('%', 'susurros', '%');
+END $$
+DELIMITER ;
+5 DELIMITER $$
+CREATE PROCEDURE update_socio()
+BEGIN
+UPDATE socio
+SET soc_telefono='3425423', soc_direccion='cra 14#56c-9'
+WHERE soc_numero=4;
+END $$
+DELIMITER ;
+6 DELIMITER $$
+CREATE PROCEDURE delete_libro()
+BEGIN
+DELETE  FROM libro
+WHERE lib_titulo = 'El Secreto de las Estrellas Olvidadas';
+END $$
+DELIMITER ;
+7 DELIMITER $$
+
+CREATE FUNCTION contar_socios()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE num_socios INT;
+    
+    
+    SELECT COUNT(*) INTO num_socios
+    FROM socios;
+    
+  
+    RETURN num_socios;
+END $$
+
+DELIMITER ;
+
+8 DELIMITER $$
+
+CREATE FUNCTION dias_en_prestamo(lib_isbn BIGINT)
+RETURNS INT
+BEGIN
+    DECLARE dias INT;
+
+    -- Calcular la diferencia en días entre la fecha de devolución y la fecha de préstamo
+    SELECT DATEDIFF(pres_fechaDevolucion, pres_fechaPrestamo) INTO dias
+    FROM prestamo
+  WHERE lib_copiaISBN = lib_isbn;
+
+    RETURN dias;
+END $$
+
+DELIMITER ;
