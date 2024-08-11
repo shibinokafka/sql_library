@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 01-08-2024 a las 17:22:12
+-- Tiempo de generación: 11-08-2024 a las 22:20:28
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -287,6 +287,19 @@ INSERT INTO `libro` (`lib_isbn`, `lib_titulo`, `lib_genero`, `lib_numeroPaginas`
 -- --------------------------------------------------------
 
 --
+-- Estructura Stand-in para la vista `libro_tipoautor`
+-- (Véase abajo para la vista actual)
+--
+CREATE TABLE `libro_tipoautor` (
+`lib_titulo` varchar(255)
+,`lib_genero` varchar(20)
+,`lib_numeroPaginas` int(11)
+,`tip_Autor` varchar(20)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `prestamo`
 --
 
@@ -311,6 +324,19 @@ INSERT INTO `prestamo` (`pres_id`, `pres_fechaPrestamo`, `pres_fechaDevolucion`,
 ('pres6', '2023-08-19', '2023-08-26', 12, 5555555555),
 ('pres7', '2023-10-24', '2023-10-27', 3, 1357924680),
 ('pres8', '2023-11-11', '2023-11-12', 4, 9999999999);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura Stand-in para la vista `prestamo_socio`
+-- (Véase abajo para la vista actual)
+--
+CREATE TABLE `prestamo_socio` (
+`soc_nombre` varchar(45)
+,`soc_apellido` varchar(45)
+,`pres_fechaPrestamo` date
+,`pres_fechaDevolucion` date
+);
 
 -- --------------------------------------------------------
 
@@ -432,6 +458,24 @@ INSERT INTO `tipoautores` (`copiaISBN`, `copiaAutor`, `tip_Autor`) VALUES
 (7777777777, 765, 'Autor'),
 (9999999999, 98, 'Autor');
 
+-- --------------------------------------------------------
+
+--
+-- Estructura para la vista `libro_tipoautor`
+--
+DROP TABLE IF EXISTS `libro_tipoautor`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `libro_tipoautor`  AS SELECT `libro`.`lib_titulo` AS `lib_titulo`, `libro`.`lib_genero` AS `lib_genero`, `libro`.`lib_numeroPaginas` AS `lib_numeroPaginas`, `tipoautores`.`tip_Autor` AS `tip_Autor` FROM (`libro` join `tipoautores` on(`libro`.`lib_isbn` = `tipoautores`.`copiaISBN`)) ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura para la vista `prestamo_socio`
+--
+DROP TABLE IF EXISTS `prestamo_socio`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `prestamo_socio`  AS SELECT `socio`.`soc_nombre` AS `soc_nombre`, `socio`.`soc_apellido` AS `soc_apellido`, `prestamo`.`pres_fechaPrestamo` AS `pres_fechaPrestamo`, `prestamo`.`pres_fechaDevolucion` AS `pres_fechaDevolucion` FROM (`socio` join `prestamo` on(`prestamo`.`soc_copiaNumero` = `socio`.`soc_numero`)) ;
+
 --
 -- Índices para tablas volcadas
 --
@@ -458,7 +502,8 @@ ALTER TABLE `autor`
 -- Indices de la tabla `libro`
 --
 ALTER TABLE `libro`
-  ADD PRIMARY KEY (`lib_isbn`);
+  ADD PRIMARY KEY (`lib_isbn`),
+  ADD KEY `idx_libro` (`lib_titulo`);
 
 --
 -- Indices de la tabla `prestamo`
